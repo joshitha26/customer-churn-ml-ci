@@ -14,6 +14,7 @@ DATA_FILE = "customer_churn.csv"
 
 
 def load_dataset():
+
     print("Loading customer churn dataset...")
 
     data = pd.read_csv(DATA_FILE)
@@ -50,10 +51,9 @@ def train_model():
     X = data[features]
     y = data[target]
 
-    print("Target distribution:")
+    print("\nTarget distribution:")
     print(y.value_counts())
 
-    # Numerical and categorical columns
     numerical_features = [
         "Age",
         "Tenure",
@@ -70,7 +70,6 @@ def train_model():
         "Contract Length"
     ]
 
-    # Preprocessing
     preprocessor = ColumnTransformer(
         transformers=[
             (
@@ -86,7 +85,6 @@ def train_model():
         ]
     )
 
-    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
@@ -98,7 +96,6 @@ def train_model():
     print("Training records:", len(X_train))
     print("Testing records :", len(X_test))
 
-    # ML pipeline
     model = Pipeline([
         ("preprocessor", preprocessor),
         (
@@ -133,7 +130,6 @@ def train_model():
     print("\nConfusion Matrix:")
     print(matrix)
 
-    # Save model
     joblib.dump(
         model,
         "customer_churn_model.pkl"
@@ -143,7 +139,6 @@ def train_model():
         "\nModel saved as customer_churn_model.pkl"
     )
 
-    # Save metrics
     metrics = {
         "accuracy": float(accuracy),
         "training_records": len(X_train),
@@ -151,6 +146,7 @@ def train_model():
     }
 
     with open("metrics.json", "w") as file:
+
         json.dump(
             metrics,
             file,
