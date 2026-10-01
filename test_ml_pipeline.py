@@ -67,7 +67,7 @@ class TestMLPipeline(unittest.TestCase):
 
         self.assertIn(
             int(prediction),
-            2
+            [0, 1]
         )
 
     def test_second_customer_prediction(self):
