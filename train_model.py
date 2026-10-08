@@ -4,7 +4,7 @@ import pandas as pd
 
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -14,60 +14,33 @@ DATA_FILE = "customer_churn.csv"
 
 
 def load_dataset():
+    df = pd.read_csv(DATA_FILE)
 
-    print("Loading customer churn dataset...")
+    X = df.drop(columns=["Churn"])
+    y = df["Churn"]
 
-    data = pd.read_csv(DATA_FILE)
-
-    print("Dataset loaded successfully.")
-    print("Number of records:", len(data))
-    print("Number of columns:", len(data.columns))
-
-    return data
+    return X, y
 
 
-def train_model():
+def main():
 
-    data = load_dataset()
+    X, y = load_dataset()
 
-    # Remove CustomerID because it is only an identifier
-    data = data.drop(columns=["CustomerID"])
-
-    features = [
-        "Age",
-        "Gender",
-        "Tenure",
-        "Usage Frequency",
-        "Support Calls",
-        "Payment Delay",
-        "Subscription Type",
-        "Contract Length",
-        "Total Spend",
-        "Last Interaction"
-    ]
-
-    target = "Churn"
-
-    X = data[features]
-    y = data[target]
-
-    print("\nTarget distribution:")
-    print(y.value_counts())
-
-    numerical_features = [
-        "Age",
-        "Tenure",
-        "Usage Frequency",
-        "Support Calls",
-        "Payment Delay",
-        "Total Spend",
-        "Last Interaction"
-    ]
-
-    categorical_features = [
+    categorical_columns = [
         "Gender",
         "Subscription Type",
         "Contract Length"
+    ]
+
+    numerical_columns = [
+        "CustomerID",
+        "Age",
+        "Tenure",
+        "Usage Frequency",
+        "Support Calls",
+        "Payment Delay",
+        "Total Spend",
+        "Last Interaction"
     ]
 
     preprocessor = ColumnTransformer(
@@ -75,68 +48,49 @@ def train_model():
             (
                 "num",
                 StandardScaler(),
-                numerical_features
+                numerical_columns
             ),
             (
                 "cat",
                 OneHotEncoder(handle_unknown="ignore"),
-                categorical_features
+                categorical_columns
             )
+        ]
+    )
+
+    model = LogisticRegression(
+        max_iter=1000
+    )
+
+    pipeline = Pipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("model", model)
         ]
     )
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
-        test_size=0.20,
+        test_size=0.2,
         random_state=42,
         stratify=y
     )
 
-    print("Training records:", len(X_train))
-    print("Testing records :", len(X_test))
+    pipeline.fit(X_train, y_train)
 
-    model = Pipeline([
-        ("preprocessor", preprocessor),
-        (
-            "classifier",
-            LogisticRegression(
-                max_iter=1000,
-                random_state=42
-            )
-        )
-    ])
-
-    print("Training customer churn model...")
-
-    model.fit(X_train, y_train)
-
-    predictions = model.predict(X_test)
+    predictions = pipeline.predict(X_test)
 
     accuracy = accuracy_score(
         y_test,
         predictions
     )
 
-    matrix = confusion_matrix(
-        y_test,
-        predictions
-    )
-
-    print("\nModel Evaluation")
-    print("----------------")
-    print("Accuracy:", round(accuracy, 4))
-
-    print("\nConfusion Matrix:")
-    print(matrix)
+    print("Customer Churn Model Accuracy:", accuracy)
 
     joblib.dump(
-        model,
+        pipeline,
         "customer_churn_model.pkl"
-    )
-
-    print(
-        "\nModel saved as customer_churn_model.pkl"
     )
 
     metrics = {
@@ -146,15 +100,8 @@ def train_model():
     }
 
     with open("metrics.json", "w") as file:
-
-        json.dump(
-            metrics,
-            file,
-            indent=4
-        )
-
-    print("Metrics saved as metrics.json")
+        json.dump(metrics, file, indent=4)
 
 
 if __name__ == "__main__":
-    train_model()
+    main()
