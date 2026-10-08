@@ -3,7 +3,7 @@ import joblib
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -100,9 +100,10 @@ def train_model():
         ("preprocessor", preprocessor),
         (
             "classifier",
-            LogisticRegression(
-                max_iter=1000,
-                random_state=42
+            RandomForestClassifier(
+                n_estimators=200,
+                random_state=42,
+                n_jobs=-1
             )
         )
     ])
