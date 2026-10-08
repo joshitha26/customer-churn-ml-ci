@@ -15,7 +15,6 @@ permissions:
   contents: read
 
 jobs:
-
   train-and-test:
 
     runs-on: ubuntu-latest
