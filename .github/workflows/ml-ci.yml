@@ -64,5 +64,6 @@ jobs:
         with:
           name: customer-churn-ml-release
           path: release_candidate/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
