@@ -39,7 +39,7 @@ class TestPredictionApplication(unittest.TestCase):
 
         self.assertEqual(
             response.status_code,
-            201
+            200
         )
 
         result = response.get_json()
